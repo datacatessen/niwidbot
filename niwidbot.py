@@ -8,14 +8,14 @@ import re
 
 from slackclient import SlackClient
 
-if 'SLACK_BOT_TOKEN' not in os.environ:
-    raise ValueError("No SLACK_BOT_TOKEN in environment. export SLACK_BOT_TOKEN")
+with open('token.secret', 'rb') as f:
+    TOKEN = f.read().strip()
 
 logging.basicConfig(level=logging.INFO,format='%(asctime)-15s %(message)s')
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-client = SlackClient(os.environ['SLACK_BOT_TOKEN'])
+client = SlackClient(TOKEN)
 
 img_path = 'imgs'
 DOG_IMAGES = [ '%s/%s' % (img_path, f) for f in os.listdir(img_path) if os.path.isfile(os.path.join(img_path, f)) ]
