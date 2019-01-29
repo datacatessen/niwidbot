@@ -1,1 +1,6 @@
 # niwidbot
+
+```
+make start
+```
+
