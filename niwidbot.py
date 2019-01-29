@@ -3,7 +3,9 @@
 import logging
 import os
 import time
+import random
 import re
+
 from slackclient import SlackClient
 
 logging.basicConfig()
@@ -13,11 +15,11 @@ if 'SLACK_BOT_TOKEN' not in os.environ:
 
 client = SlackClient(os.environ['SLACK_BOT_TOKEN'])
 
-DOG_IMAGES = [
+img_path = 'imgs'
+DOG_IMAGES = [ '%s/%s' % (img_path, f) for f in os.listdir(img_path) if os.path.isfile(os.path.join(img_path, f)) ]
 
-]
 # constants
-RTM_READ_DELAY = 1 # 1 second delay between reading from RTM
+RTM_READ_DELAY_MS = 100
 MENTION_REGEX = r'^<@(|[WU].+?)>(.*)'
 
 def parse_user_mention(slack_events):
@@ -37,16 +39,23 @@ if __name__ == '__main__':
         id = client.api_call('auth.test')['user_id']
         while True:
             user_id, command, channel = parse_user_mention(client.rtm_read())
-            print user_id, command, channel
             if user_id:
-                print 'someone is talking to me!'
+                filename = random.choice(DOG_IMAGES)
+                with open(filename, 'rb') as f:
+                    content = f.read()
+
+                ext = os.path.splitext(filename)[1][1:]
+
+                print 'uploading %s with ext %s and %s bytes' % (filename, ext, len(content))
                 # Sends the response back to the channel
                 client.api_call(
-                    'chat.postMessage',
-                    channel=channel,
-                    text=default_response
+                    'files.upload',
+                    channels=channel,
+                    filetype=ext,
+                    file=content,
+                    title='NIWID'
                 )
 
-            time.sleep(RTM_READ_DELAY)
+            time.sleep(RTM_READ_DELAY_MS / 1000.0)
     else:
         print("Connection failed. Exception traceback printed above.")
