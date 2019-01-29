@@ -8,10 +8,12 @@ import re
 
 from slackclient import SlackClient
 
-logging.basicConfig()
-
 if 'SLACK_BOT_TOKEN' not in os.environ:
     raise ValueError("No SLACK_BOT_TOKEN in environment. export SLACK_BOT_TOKEN")
+
+logging.basicConfig(level=logging.INFO,format='%(asctime)-15s %(message)s')
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 client = SlackClient(os.environ['SLACK_BOT_TOKEN'])
 
@@ -32,7 +34,7 @@ def parse_user_mention(slack_events):
 
 if __name__ == '__main__':
     if client.rtm_connect(with_team_state=False):
-        print("Starter Bot connected and running!")
+        logger.info("NIWIDBot connected and running!")
 
         # Read bot's user ID by calling Web API method `auth.test`
         id = client.api_call('auth.test')['user_id']
@@ -45,8 +47,8 @@ if __name__ == '__main__':
 
                 ext = os.path.splitext(filename)[1][1:]
 
-                print 'uploading %s with ext %s and %s bytes' % (filename, ext, len(content))
-                # Sends the response back to the channel
+                logger.info("Uploading %s with ext %s and %s bytes", filename, ext, len(content))
+
                 client.api_call(
                     'files.upload',
                     channels=channel,
@@ -57,4 +59,4 @@ if __name__ == '__main__':
 
             time.sleep(RTM_READ_DELAY_MS / 1000.0)
     else:
-        print("Connection failed. Exception traceback printed above.")
+        logging.error("Connection failed")
