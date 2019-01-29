@@ -26,7 +26,6 @@ def parse_user_mention(slack_events):
     for event in slack_events:
         if event['type'] == 'message' and not 'subtype' in event:
             matches = re.search(MENTION_REGEX, event['text'])
-            print matches
             if matches:
                 return matches.group(1), matches.group(2).strip(), event['channel']
     return None, None, None
