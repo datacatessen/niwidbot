@@ -1,4 +1,4 @@
 token.secret
-*.crt
+*.tar.gz
 env/
 .vscode
