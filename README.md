@@ -8,12 +8,17 @@ Create a file called `token.secret` which contains the Slack token that can be u
 
 To run locally:
 ```
-make start
+make
 ```
 
 To build and run as Docker:
 
 ```
-sudo docker build -t niwidbot:latest .
-sudo docker run niwidbot:latest
+make run
+```
+
+To save as `niwidbot.tar.gz`
+
+```
+make save
 ```
