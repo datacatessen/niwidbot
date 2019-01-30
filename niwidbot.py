@@ -5,17 +5,19 @@ import os
 import time
 import random
 import re
+import sys
 
 from slackclient import SlackClient
-
-with open('token.secret', 'rb') as f:
-    TOKEN = f.read().strip()
 
 logging.basicConfig(level=logging.INFO,format='%(asctime)-15s %(message)s')
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-client = SlackClient(TOKEN)
+if 'SLACK_CLIENT_TOKEN' not in os.environ:
+    logger.error("No SLACK_CLIENT_TOKEN set in environment")
+    sys.exit(1)
+
+client = SlackClient(os.environ['SLACK_CLIENT_TOKEN'])
 
 img_path = 'imgs'
 DOG_IMAGES = [ '%s/%s' % (img_path, f) for f in os.listdir(img_path) if os.path.isfile(os.path.join(img_path, f)) ]
