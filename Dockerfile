@@ -1,12 +1,11 @@
-FROM centos:7
+FROM python:2-alpine
+
+COPY requirements.txt requirements.txt
+RUN pip --no-cache-dir install -r requirements.txt
 
 COPY imgs imgs
-COPY niwidbot.py niwidbot.py
-COPY requirements.txt requirements.txt
-COPY token.secret token.secret
 
-RUN yum -y install epel-release
-RUN yum -y install python-pip
-RUN pip install -r requirements.txt
+COPY niwidbot.py niwidbot.py
+COPY token.secret token.secret
 
 CMD python niwidbot.py
