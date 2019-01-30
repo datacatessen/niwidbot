@@ -40,7 +40,7 @@ if __name__ == '__main__':
         id = client.api_call('auth.test')['user_id']
         while True:
             user_id, command, channel = parse_user_mention(client.rtm_read())
-            if user_id:
+            if user_id == id:
                 filename = random.choice(DOG_IMAGES)
                 with open(filename, 'rb') as f:
                     content = f.read()
