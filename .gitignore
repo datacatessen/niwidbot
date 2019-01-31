@@ -1,4 +1,5 @@
 token.secret
 *.tar.gz
 env/
-.vscode
+.vscode/
+*.pyc
