@@ -2,14 +2,15 @@
 
 import logging
 import os
-import time
-import random
-import re
 import sys
+import time
 
+from pyee import EventEmitter
 from slackclient import SlackClient
 
-logging.basicConfig(level=logging.INFO,format='%(asctime)-15s %(message)s')
+from lib.util import getPluginsByType
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)-15s %(message)s')
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -18,47 +19,31 @@ if 'SLACK_CLIENT_TOKEN' not in os.environ:
     sys.exit(1)
 
 client = SlackClient(os.environ['SLACK_CLIENT_TOKEN'])
+ee = EventEmitter()
 
-img_path = 'imgs'
-DOG_IMAGES = [ '%s/%s' % (img_path, f) for f in os.listdir(img_path) if os.path.isfile(os.path.join(img_path, f)) ]
+PLUGIN_FOLDER = "./plugins"
+RTM_READ_DELAY_MS = 5
 
-# constants
-RTM_READ_DELAY_MS = 100
-MENTION_REGEX = r'^<@(|[WU].+?)>(.*)'
-
-def parse_user_mention(slack_events):
-    for event in slack_events:
-        if event['type'] == 'message' and not 'subtype' in event:
-            matches = re.search(MENTION_REGEX, event['text'])
-            if matches:
-                return matches.group(1), matches.group(2).strip(), event['channel']
-    return None, None, None
+def init_plugins():
+    for cls in getPluginsByType(PLUGIN_FOLDER, 'EventHandler'):
+        logger.info("Loading plugin: %s" % cls.__name__)
+        handler = cls(client, logger)
+        ee.on('slack.events', handler.handle)
 
 if __name__ == '__main__':
+    logger.info("Starting bot...")
+    init_plugins()
+
     if client.rtm_connect(with_team_state=False):
-        logger.info("NIWIDBot connected and running!")
-
         # Read bot's user ID by calling Web API method `auth.test`
-        id = client.api_call('auth.test')['user_id']
+        bot_user_info = client.api_call(
+            'users.info', user=client.api_call('auth.test')['user_id'])
+        logger.info("Bot '%s' connected and running!" %
+                    (bot_user_info['user']['profile']['real_name_normalized']))
+
         while True:
-            user_id, command, channel = parse_user_mention(client.rtm_read())
-            if user_id == id:
-                filename = random.choice(DOG_IMAGES)
-                with open(filename, 'rb') as f:
-                    content = f.read()
-
-                ext = os.path.splitext(filename)[1][1:]
-
-                logger.info("Uploading %s with ext %s and %s bytes", filename, ext, len(content))
-
-                client.api_call(
-                    'files.upload',
-                    channels=channel,
-                    filetype=ext,
-                    file=content,
-                    title='NIWID'
-                )
-
+            for event in client.rtm_read():
+                ee.emit('slack.events', event)
             time.sleep(RTM_READ_DELAY_MS / 1000.0)
     else:
         logging.error("Connection failed")

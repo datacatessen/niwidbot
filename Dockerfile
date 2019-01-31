@@ -5,6 +5,8 @@ RUN pip --no-cache-dir install -r requirements.txt
 
 COPY imgs imgs
 
+COPY lib lib
+COPY plugins plugins
 COPY niwidbot.py niwidbot.py
 COPY token.secret token.secret
 
