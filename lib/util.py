@@ -35,10 +35,15 @@ def loadPlugin(plugin, main_module = "__init__"):
     return imp.load_module(main_module, *plugin["info"])
 
 def getPluginsByType(plugin_folder, type_str):
+    plugins = set()
     for module in getPlugins(plugin_folder):
+        # For some reason this is returning both NiwidHandler and ObamaHandler
+        # Resulting in NiwidHandler getting loaded twice
+        # Don't care enough to look into it... so set() it is
         for name, obj in inspect.getmembers(loadPlugin(module), inspect.isclass):
-            if inherits_from(obj, type_str): 
-                yield obj
+            if inherits_from(obj, type_str):
+                plugins.add(obj)
+    return set(plugins)
 
 def inherits_from(child, parent_name):
     if inspect.isclass(child):
