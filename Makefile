@@ -5,6 +5,7 @@ clean:
 
 env:
 	virtualenv --python python3.7 env
+	./env/bin/pip install --upgrade pip
 	./env/bin/pip install pip-tools
 	./env/bin/pip-compile --output-file requirements.txt requirements.in
 	./env/bin/pip install -r requirements.txt

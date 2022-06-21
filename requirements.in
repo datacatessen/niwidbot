@@ -1,7 +1,7 @@
 pyee
 slackclient
-websocket-client==0.47.0
-urllib3>=1.24.2
-requests
+websocket-client
+urllib3>=1.26.5
+requests>=2.28.0
 beautifulsoup4
 tabulate
